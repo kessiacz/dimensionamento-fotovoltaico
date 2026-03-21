@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dimensionamento Solar - Portfólio</title>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+    <link rel="stylesheet" href="styles/style.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script defer src="scripts/script.js"></script>
+</head>
+<body>
+    <div class="menuOpen hidden" id="menuOverlay">
+        <div class="menu-content">
+            <h2>MENU</h2>
+            <nav>
+                <a href="https://kessiacz.github.io/">Página Inicial</a>
+                <a href="https://kessiacz.github.io/#sobre">Apresentação</a>
+                <a href="https://kessiacz.github.io/#exercicios">Exercícios</a>
+                <a href="https://kessiacz.github.io/#contacts">Contatos</a>
+            </nav>
+        </div>
+    </div>
+
+    <header>
+        <div class="container">
+            <div class="header-left">
+                <div class="menu">
+                    <i class="ri-menu-line" id="openIcon"></i>
+                    <i class="ri-close-line hidden" id="closeIcon"></i>
+                </div>
+                <a href="https://kessiacz.github.io/" class="back-button">
+                    <i class="ri-arrow-left-line"></i>
+                </a>
+            </div>
+            <nav class="nav-desktop">
+               <a href="https://kessiacz.github.io/"><h2>PORTFÓLIO</h2></a>
+            </nav>
+            <div class="toggle">
+                <input type="checkbox" id="checkbox">
+                <label for="checkbox" class="label"><div class="box"></div></label>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="page-title">
+            <h2>DIMENSIONAMENTO<br>ENERGIA SOLAR</h2>
+        </div>
+
+        <section class="container-exercicios">
+            <details open>
+                <summary>SISTEMA DE DIMENSIONAMENTO PARA INSTALAÇÃO DE ENERGIA SOLAR</summary>
+                <div class="content">
+                    <form id="solarForm">
+                        <label>CEP DA INSTALAÇÃO:</label>
+                        <input type="text" name="cep" id="cep" placeholder="00000-000" required>
+                        
+                        <label>TIPO DE SISTEMA:</label>
+                        <select name="tipo_sys" id="tipo_sys">
+                            <option value="ongrid">SISTEMA ON-GRID</option>
+                            <option value="offgrid">SISTEMA OFF-GRID</option>
+                            <option value="hibrido">SISTEMA HÍBRIDO</option>
+                        </select>
+
+                        <div id="container_grupo" style="width: 100%;">
+                            <label>GRUPO TARIFÁRIO:</label>
+                            <select name="grupo" id="grupo">
+                                <option value="B">GRUPO B (RESIDENCIAL/RURAL)</option>
+                                <option value="A">GRUPO A (INDUSTRIAL)</option>
+                            </select>
+                        </div>
+
+                        <div id="campo_padrao" style="width: 100%;">
+                            <label>TIPO DE CONEXÃO:</label>
+                            <select name="padrao" id="padrao">
+                                <option value="mono">MONOFÁSICO (30 kWh)</option>
+                                <option value="bi">BIFÁSICO (50 kWh)</option>
+                                <option value="tri">TRIFÁSICO (100 kWh)</option>
+                            </select>
+                        </div>
+
+                        <label>CONSUMO MÉDIO (kWh):</label>
+                        <input type="number" name="media_kwh" id="media_kwh" placeholder="0,00" required step="0.01">
+
+                        <div id="campo_demanda" style="display:none; width: 100%;">
+                            <label>DEMANDA CONTRATADA (kW):</label>
+                            <input type="number" name="demanda" id="demanda" placeholder="0,00" step="0.01">
+                        </div>
+
+                        <div id="campo_autonomia" style="display:none; width: 100%;">
+                            <label>DIAS DE AUTONOMIA:</label>
+                            <input type="number" name="autonomia" id="autonomia" placeholder="EX: 1">
+                        </div>
+
+                        <button type="submit" id="btnCalcular">CALCULAR</button>
+                    </form>
+
+                    <div id="resultado-container"></div>
+                </div>
+            </details>
+        </section>
+    </main>
+</body>
+</html>

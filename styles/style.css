@@ -1,0 +1,55 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Poppins:wght@500;600&display=swap");
+
+* { margin: 0; padding: 0; box-sizing: border-box; text-decoration: none; }
+:root { font-size: 62.5%; scroll-behavior: smooth; }
+
+body { background-color: #13131F; color: #F9F9F9; font-family: 'DM Sans', sans-serif; overflow-x: hidden; transition: 0.3s; }
+body.light-mode { background-color: #F9F9F9; color: #13131F; }
+
+/* SCROLLBAR PERSONALIZADA */
+::-webkit-scrollbar { width: 1rem; }
+::-webkit-scrollbar-track { background-color: #13131F; }
+::-webkit-scrollbar-thumb { background-color: #8257E6; border-radius: 1rem; border: 0.2rem solid #13131F; }
+
+/* HEADER */
+header { position: sticky; top: 0; width: 100%; background-color: #13131F; z-index: 1000; border-bottom: 0.1rem solid rgba(130, 87, 230, 0.2); }
+header .container { display: flex; justify-content: space-between; align-items: center; padding: 2.2rem 5%; max-width: 1200px; margin: 0 auto; }
+.header-left { display: flex; align-items: center; gap: 2rem; }
+.menu i, .back-button i { font-size: 2.4rem; color: #8257E6; cursor: pointer; }
+header h2 { font-size: 2rem; font-family: 'Poppins'; color: #F9F9F9; }
+body.light-mode header h2 { color: #8257E6; }
+
+/* MENU OVERLAY */
+.menuOpen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(19, 19, 31, 0.98); backdrop-filter: blur(10px); z-index: 2000; display: flex; justify-content: center; align-items: center; }
+.menu-content h2 { font-size: 2.4rem; color: #8257E6; margin-bottom: 4rem; text-align: center; }
+.menuOpen nav { display: flex; flex-direction: column; gap: 3rem; text-align: center; }
+.menuOpen a { font-size: 3.2rem; color: #F9F9F9; font-family: 'Poppins'; font-weight: 600; transition: 0.3s; }
+.menuOpen a:hover { color: #8257E6; transform: scale(1.05); }
+.hidden { display: none !important; }
+
+/* FORMULÁRIO E CONTEÚDO */
+.page-title { text-align: center; margin: 6rem 0; }
+.page-title h2 { font-size: 3.2rem; font-family: 'Poppins'; }
+.container-exercicios { width: 90%; max-width: 800px; margin: 0 auto; }
+
+details { background: #1c1c2d; border-radius: 1.5rem; border: 1px solid #2a2a40; margin-bottom: 2rem; overflow: hidden; }
+summary { padding: 2.5rem; cursor: pointer; font-size: 1.8rem; font-weight: 600; color: #F9F9F9; list-style: none; display: flex; justify-content: space-between; }
+summary::after { content: '+'; color: #8257E6; }
+details[open] summary::after { content: '-'; }
+
+.content { padding: 2.5rem; display: flex; flex-direction: column; gap: 1.5rem; }
+form { display: flex; flex-direction: column; gap: 1.2rem; width: 100%; }
+label { font-size: 1.3rem; color: #8257E6; font-weight: bold; }
+input, select { width: 100%; padding: 1.2rem; background: #13131F; border: 2px solid #2a2a40; border-radius: 5rem; color: #8257E6; font-weight: bold; text-align: center; outline: none; }
+button { background: #8257E6; color: #FFF; border: none; padding: 1.5rem; border-radius: 5rem; font-weight: bold; cursor: pointer; text-transform: uppercase; transition: 0.3s; }
+button:hover { background: #9466ff; transform: translateY(-2px); }
+
+/* RESULTADOS */
+.resultado-tecnico { margin-top: 2rem; padding: 2rem; background: rgba(130, 87, 230, 0.1); border-left: 5px solid #8257E6; border-radius: 1rem; }
+pre { font-family: 'Courier New', monospace; font-size: 1.3rem; color: #F9F9F9; white-space: pre-wrap; word-break: break-all; }
+
+/* TOGGLE TEMA */
+.toggle .label { display: flex; background: #8257E6; width: 5.5rem; height: 2.6rem; border-radius: 2rem; padding: 0.3rem; cursor: pointer; position: relative; }
+.toggle .box { background-color: #13131F; height: 2rem; width: 2rem; border-radius: 50%; transition: 0.4s; }
+#checkbox { display: none; }
+#checkbox:checked + .label .box { transform: translateX(2.9rem); }
