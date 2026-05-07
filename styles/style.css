@@ -421,6 +421,18 @@ select option{
     display:block;
 }
 
+/* ── BARRA DE PROGRESSÃO ── */
+#progress-bar{
+  position:fixed;
+  top:60px;
+  left:0;
+  height:2px;
+  background:var(--teal);
+  z-index:200;
+  transition:width .1s linear;
+  box-shadow:0 0 10px rgba(0,217,164,.5);
+}
+
 /* ── CURSOR (desktop) ── */
 .cursor-dot,.cursor-outline{
   pointer-events:none;
@@ -509,7 +521,7 @@ footer{
   }
 
   .page-title {
-    font-size: clamp(1.2rem, 8vw, 1.5rem);
+    font-size: clamp(1.3rem, 5vw, 1.3rem);
     line-height: 1.2;
     letter-spacing: -0.02em;
     word-break: normal;

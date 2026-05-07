@@ -1037,3 +1037,11 @@ if (!isTouch()) {
     });
   }
 }
+
+// ── Barra de progresso ──
+window.addEventListener('scroll', () => {
+  const pct = document.documentElement.scrollTop /
+    (document.documentElement.scrollHeight - window.innerHeight) * 100;
+  const bar = document.getElementById('progress-bar');
+  if (bar) bar.style.width = pct + '%';
+}, {passive:true});
