@@ -994,3 +994,28 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.text(`Gerado em ${new Date().toLocaleString('pt-BR')}`, 196, 291, { align: 'right' });
     }
 });
+
+// ── Detecção touch ──
+const isTouch = () => window.matchMedia('(hover:none) and (pointer:coarse)').matches;
+
+// ── Cursor (só desktop) ──
+if (!isTouch()) {
+  const dot = document.querySelector('.cursor-dot');
+  const out = document.querySelector('.cursor-outline');
+  if (dot && out) {
+    let mx=0,my=0,ox=0,oy=0;
+    window.addEventListener('mousemove', e => {
+      mx=e.clientX; my=e.clientY;
+      dot.style.transform=`translate(${mx}px,${my}px) translate(-50%,-50%)`;
+    });
+    (function loop(){
+      ox+=(mx-ox)*.15; oy+=(my-oy)*.15;
+      out.style.transform=`translate(${ox}px,${oy}px) translate(-50%,-50%)`;
+      requestAnimationFrame(loop);
+    })();
+    document.querySelectorAll('a,button,.project-card,.contact-item').forEach(el=>{
+      el.addEventListener('mouseenter',()=>{out.style.width='55px';out.style.height='55px';out.style.backgroundColor='var(--teal-dim)';out.style.opacity='.2'});
+      el.addEventListener('mouseleave',()=>{out.style.width='34px';out.style.height='34px';out.style.backgroundColor='transparent';out.style.opacity='.4'});
+    });
+  }
+}
