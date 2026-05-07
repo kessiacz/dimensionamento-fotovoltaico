@@ -221,10 +221,10 @@ document.addEventListener('DOMContentLoaded', () => {
         const ps_max_inv  = Math.floor(V_MAX_INV   / voc_frio);         // Voc no frio  ≤ V_MAX_INV
         const ps_max      = Math.min(ps_max_mppt, ps_max_inv);
 
-        let paineisPorString = Math.max(1, Math.min(ps_max, numPaineis));
-        paineisPorString     = Math.max(ps_min, paineisPorString);
-
-        const numStrings = Math.ceil(numPaineis / paineisPorString);
+        const numStrings = Math.ceil(numPaineis / ps_max);
+        
+        let paineisPorString = Math.ceil(numPaineis / numStrings);
+        paineisPorString = Math.max(ps_min, paineisPorString);
 
         // ── FIX CRÍTICO: calcular tensões/correntes totais ──
         //    (v3.0 referenciava `stringDesign.x` — objeto inexistente aqui)
@@ -258,44 +258,82 @@ document.addEventListener('DOMContentLoaded', () => {
     // ════════════════════════════════════════════════════════
     const SECOES_COMERCIAIS = [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150];
 
+    // Ampacidade NBR 5410 Tab.36 / cabo solar XLPE-EPR H1Z2Z2-K
+    // CC  — 2 condutores, instalação em conduto (método B2), 70 °C
+    // CA  — 3 condutores, instalação em conduto (método B2), 70 °C
+    const AMPACIDADE_DC = [
+        {s:1.5, i:20 },{s:2.5, i:27 },{s:4,   i:35 },{s:6,   i:45 },
+        {s:10,  i:62 },{s:16,  i:83 },{s:25,  i:109},{s:35,  i:133},
+        {s:50,  i:160},{s:70,  i:203},{s:95,  i:248},{s:120, i:289},{s:150,i:330}
+    ];
+    const AMPACIDADE_AC = [
+        {s:1.5, i:13.5},{s:2.5, i:18  },{s:4,   i:24  },{s:6,   i:31  },
+        {s:10,  i:43  },{s:16,  i:57  },{s:25,  i:75  },{s:35,  i:92  },
+        {s:50,  i:112 },{s:70,  i:138 },{s:95,  i:168 },{s:120, i:194 },{s:150,i:223}
+    ];
+
+    // Seção mínima CC para strings FV — norma técnica Energisa GD / NBR 16690 §7.3
+    const SECAO_MIN_DC_ENERGISA = 4; // mm²
+
     function normalizarSecao(secao_calc) {
         const encontrada = SECOES_COMERCIAIS.find(s => s >= secao_calc);
         if (!encontrada) {
             console.warn(`Seção calculada (${secao_calc.toFixed(2)} mm²) excede 150 mm². Verifique o projeto.`);
-            return 150;  // retorna o maior disponível com aviso
+            return 150;
         }
         return encontrada;
     }
 
+    // Retorna a menor seção comercial cuja ampacidade suporta Ip
+    function secaoPorAmpacidade(Ip, tabela) {
+        const found = tabela.find(row => row.i >= Ip);
+        if (!found) {
+            console.warn(`Corrente de projeto ${Ip} A excede a tabela de ampacidade. Adotando 150 mm².`);
+            return 150;
+        }
+        return found.s;
+    }
+
     // Cabo CC por string (de cada string ao inversor ou caixa de combinação)
     // NBR 16690 §7.4: I_proj = Isc × 1,25 × 1,25 = Isc × 1,5625
+    // Seção final = max(critério ΔV, critério ampacidade, mínimo Energisa 4 mm²)
     function dimensionarCaboDC(isc_painel, vmp_total, comp = 20) {
-        const Ip       = +(isc_painel * 1.5625).toFixed(1);  // Isc × 1,25 × 1,25
-        const dv_max   = vmp_total * QUEDA_DC_MAX;
-        const s_calc   = (2 * RESISTIVIDADE_COBRE * comp * Ip) / dv_max;
-        const secao_mm2 = normalizarSecao(s_calc);
-        const R        = (2 * RESISTIVIDADE_COBRE * comp) / secao_mm2;
+        const Ip        = +(isc_painel * 1.5625).toFixed(1);
+        const dv_max    = vmp_total * QUEDA_DC_MAX;
+        const s_queda   = (2 * RESISTIVIDADE_COBRE * comp * Ip) / dv_max;
+        const s_vdrop   = normalizarSecao(s_queda);
+        const s_ampa    = secaoPorAmpacidade(Ip, AMPACIDADE_DC);
+        const secao_mm2 = Math.max(s_vdrop, s_ampa, SECAO_MIN_DC_ENERGISA);
+        const criterio  = (s_ampa > s_vdrop && s_ampa >= SECAO_MIN_DC_ENERGISA) ? 'ampacidade' :
+                          (SECAO_MIN_DC_ENERGISA > s_vdrop && SECAO_MIN_DC_ENERGISA >= s_ampa) ? 'min.Energisa' :
+                          'queda de tensão';
+        const R         = (2 * RESISTIVIDADE_COBRE * comp) / secao_mm2;
         return {
             secao_mm2,
             corrente_projeto: Ip,
+            criterio,
             queda_v:   +(R * Ip).toFixed(2),
             queda_pct: +((R * Ip / vmp_total) * 100).toFixed(2)
         };
     }
 
     // Cabo CA (do inversor ao quadro de distribuição)
-    // Usa tensão de fase para monofásico / bifásico, ou tensão de linha para trifásico
+    // Seção final = max(critério ΔV, critério ampacidade)
     function dimensionarCaboAC(invKw, tensaoAC = 220, comp = 10) {
         const Iac       = +(invKw * 1000 / tensaoAC).toFixed(1);
         const Ip        = +(Iac * 1.25).toFixed(1);
         const dv_max    = tensaoAC * QUEDA_AC_MAX;
-        const s_calc    = (2 * RESISTIVIDADE_COBRE * comp * Ip) / dv_max;
-        const secao_mm2 = normalizarSecao(s_calc);
+        const s_queda   = (2 * RESISTIVIDADE_COBRE * comp * Ip) / dv_max;
+        const s_vdrop   = normalizarSecao(s_queda);
+        const s_ampa    = secaoPorAmpacidade(Ip, AMPACIDADE_AC);
+        const secao_mm2 = Math.max(s_vdrop, s_ampa);
+        const criterio  = s_ampa > s_vdrop ? 'ampacidade' : 'queda de tensão';
         const R         = (2 * RESISTIVIDADE_COBRE * comp) / secao_mm2;
         return {
             secao_mm2,
             corrente_ac:   Iac,
             corrente_proj: Ip,
+            criterio,
             queda_v:   +(R * Ip).toFixed(2),
             queda_pct: +((R * Ip / tensaoAC) * 100).toFixed(2)
         };
@@ -491,20 +529,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const protecoes = dimensionarProtecoes(stringDesign, inv_sugerido, tensaoAC);
 
             // 11. BATERIAS (Off-Grid / Híbrido) ──────────────
+            //     Tensão do banco selecionada pela potência do sistema (prática padrão):
+            //       ≤ 1 500 W → 12 V  |  ≤ 3 000 W → 24 V  |  > 3 000 W → 48 V
             //     C_Ah = (E_dia_Wh × autonomia) / (V_banco × DoD)
-            //     DoD = 50 % → fator 0,5 (baterias chumbo-ácido conservador)
+            //     DoD = 50 % → fator 0,5 (baterias chumbo-ácido — conservador)
             let bateriaInfo = null;
             if (sistema === 'offgrid' || sistema === 'hibrido') {
                 const pot_w      = pot_final * 1000;
-                const tensaoBat  = pot_w <= 1200 ? 12 : pot_w <= 2400 ? 24 : 48;
-                const E_dia_Wh   = (meta_geracao / 30) * 1000;
+                const tensaoBat  = pot_w <= 1500 ? 12 : pot_w <= 3000 ? 24 : 48;
+                const E_dia_Wh   = (meta_geracao / 30) * 1000;   // Wh/dia médio
                 const ah         = Math.ceil((E_dia_Wh * autonomia) / (tensaoBat * 0.5));
+                const corrente_op = +(pot_w / tensaoBat).toFixed(1);
                 bateriaInfo = {
                     tensao:      tensaoBat,
-                    corrente_op: +(pot_w / tensaoBat).toFixed(1),
+                    corrente_op,
                     ah,
-                    controlador: Math.ceil((pot_w / tensaoBat) * 1.1),
-                    autonomia
+                    controlador: Math.ceil(corrente_op * 1.1),
+                    autonomia,
+                    e_dia_wh:    +E_dia_Wh.toFixed(0)
                 };
             }
 
