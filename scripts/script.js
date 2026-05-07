@@ -222,7 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const ps_max      = Math.min(ps_max_mppt, ps_max_inv);
 
         const numStrings = Math.ceil(numPaineis / ps_max);
-        
+
         let paineisPorString = Math.ceil(numPaineis / numStrings);
         paineisPorString = Math.max(ps_min, paineisPorString);
 

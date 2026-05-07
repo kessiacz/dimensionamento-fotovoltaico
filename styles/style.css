@@ -90,3 +90,98 @@ select option{background:var(--bg3);}
 footer{position:relative;z-index:1;border-top:1px solid var(--border);padding:1.5rem clamp(1.5rem,6vw,5rem);display:flex;justify-content:space-between;max-width:1080px;margin:0 auto;}
 .footer-copy{font-family:'JetBrains Mono',monospace;font-size:0.68rem;color:var(--muted);}
 
+
+/* ════════════════════════════════════
+                MOBILE 
+   ════════════════════════════════════ */
+
+/* Layout geral */
+@media (max-width: 600px) {
+  body { cursor: auto; }
+  .cursor-dot, .cursor-outline { display: none; }
+
+  .page {
+    padding: 5.5rem 1rem 4rem;
+  }
+
+  .page-title {
+    font-size: clamp(1.6rem, 8vw, 2.2rem);
+  }
+
+  .page-sub {
+    font-size: 0.82rem;
+    margin-bottom: 2rem;
+  }
+
+  .form-card {
+    padding: 1.2rem 1rem;
+  }
+
+  .field-row {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  /* Result panel — sai do sticky, vira coluna normal */
+  .result-panel {
+    position: static;
+  }
+
+  /* Result card — padding menor */
+  .result-card {
+    padding: 1.2rem 1rem;
+  }
+
+  /* Métricas menores */
+  .metric-value {
+    font-size: 1.3rem;
+  }
+
+  /* Seções extras — grid 1 coluna em vez de 2 */
+  #secoes-extras [style*="grid-template-columns:1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Botão PDF ocupa largura total */
+  #btnDownload {
+    width: 100% !important;
+  }
+
+  /* Nav */
+  nav {
+    padding: 0 1rem;
+  }
+
+  /* Gráfico de barras — altura menor */
+  #secoes-extras [style*="height:80px"] {
+    height: 60px !important;
+  }
+
+  /* Notas */
+  .note-card {
+    padding: 1rem;
+  }
+
+  /* Footer */
+  footer {
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1.2rem 1rem;
+  }
+}
+
+/* Tablet — 601px a 820px */
+@media (min-width: 601px) and (max-width: 820px) {
+  .page {
+    padding: 6rem 1.5rem 4rem;
+  }
+
+  .result-panel {
+    position: static;
+  }
+
+  .field-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
