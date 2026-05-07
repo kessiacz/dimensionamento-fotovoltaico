@@ -433,6 +433,13 @@ select option{
   box-shadow:0 0 10px rgba(0,217,164,.5);
 }
 
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:8px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:#0a241b;border-radius:8px;border:2px solid var(--bg)}
+::-webkit-scrollbar-thumb:hover{background:#144232}
+*{scrollbar-width:thin;scrollbar-color:#0a241b var(--bg)}
+
 /* ── CURSOR (desktop) ── */
 .cursor-dot,.cursor-outline{
   pointer-events:none;
