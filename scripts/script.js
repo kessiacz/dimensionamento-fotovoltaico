@@ -1,21 +1,3 @@
-/**
- * ============================================================
- *  DIMENSIONAMENTO FOTOVOLTAICO — NÍVEL ENGENHARIA
- *  Kessia Carvalho · v3.1 (corrigido)
- * ============================================================
- *  Correções aplicadas (v3.0 → v3.1):
- *   [BUG CRÍTICO] calcularStringDesign: voc_total / vmp_total /
- *     isc_total / imp_total jamais eram calculados — o código
- *     referenciava `stringDesign` (objeto inexistente no escopo).
- *   [NORMA] String design agora aplica correção de temperatura
- *     (NBR 16690 §6.3 / IEC 62109-2 §4.3.8):
- *     • Voc verificado com T_min = 5 °C (Voc sobe no frio)
- *     • Vmp verificado com T_cell_max = 70 °C (Vmp cai no calor)
- *   [TÉCNICO] pot_kwp usa dias reais do mês crítico (não mais 30 fixo)
- *   [TÉCNICO] normalizarSecao emite alerta quando seção > 95 mm²
- *   [COSMÉTICO] Alertas de string formatados com toFixed(1)
- * ============================================================
- */
 document.addEventListener('DOMContentLoaded', () => {
     let ultimoResultado = null;
 
@@ -188,11 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ════════════════════════════════════════════════════════
     //  STRING DESIGN  — NBR 16690 / IEC 62109-2
-    //  CORREÇÃO v3.1:
-    //   • Voc e Vmp agora calculados corretamente a partir das
-    //     variáveis locais (bug: antes referenciavam `stringDesign`
-    //     que ainda não existia no escopo).
-    //   • Limites verificados com tensões corrigidas por temperatura:
+    //     Voc e Vmp calculados a partir das variáveis locais
     //     Voc_frio (T_min=5°C) para o limite máximo do inversor;
     //     Vmp_qte  (T_cell_max=70°C) para o limite mínimo do MPPT.
     // ════════════════════════════════════════════════════════
@@ -208,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const V_MPPT_MAX = 600;   // V — limite superior da janela MPPT
         const V_MAX_INV  = 1000;  // V — tensão máxima absoluta de entrada do inversor
 
-        // ── Correção de temperatura por painel ──────────────
+        // ── temperatura por painel ──────────────
         // NBR 16690 §6.3.1 / IEC 62109-2 §4.3.8:
         // Voc sobe a temperaturas baixas → verificar contra V_MAX_INV
         // Vmp cai a temperaturas altas   → verificar contra V_MPPT_MIN
@@ -226,8 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let paineisPorString = Math.ceil(numPaineis / numStrings);
         paineisPorString = Math.max(ps_min, paineisPorString);
 
-        // ── FIX CRÍTICO: calcular tensões/correntes totais ──
-        //    (v3.0 referenciava `stringDesign.x` — objeto inexistente aqui)
+        // ── calcular tensões/correntes totais ──
         const voc_total      = +(paineisPorString * voc).toFixed(1);
         const vmp_total      = +(paineisPorString * vmp).toFixed(1);
         const isc_total      = +(numStrings       * isc).toFixed(1);
@@ -348,7 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ════════════════════════════════════════════════════════
     function dimensionarProtecoes(sd, invKw, tensaoAC) {
         const fusivelDC_A = Math.ceil(sd.isc_painel * 1.4 / 5) * 5;      // arredonda para múltiplo de 5 A
-        const dps_dc_uc   = Math.ceil(sd.voc_total_frio * 1.2 / 50) * 50; // usa Voc corrigido (frio)
+        const dps_dc_uc   = Math.ceil(sd.voc_total_frio * 1.2 / 50) * 50;
         const iac         = invKw * 1000 / tensaoAC;
         const djAC_A      = [6,10,16,20,25,32,40,50,63,80,100,125,160]
                               .find(v => v >= iac * 1.25) || 160;
@@ -368,7 +345,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const fluxo = [];
 
         for (let ano = 1; ano <= 25; ano++) {
-            geracaoAtual *= (1 - DEGRADACAO_ANUAL);   // degradação acumulada a cada ano
+            geracaoAtual *= (1 - DEGRADACAO_ANUAL);
             tarifaAtual  *= (1 + REAJUSTE_TARIFA_ANUAL);
             const eco = +(geracaoAtual * tarifaAtual).toFixed(2);
             econAcum += eco;
@@ -502,7 +479,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const { pr, perdas } = calcularPR(sistema, tempMedia);
 
             // 6. POTÊNCIA — dimensionada pelo MÊS CRÍTICO
-            //    FIX v3.1: usa dias reais do mês crítico (não mais 30 fixo)
             const hspCritico     = Math.min(...hspMensal);
             const mesIdxCritico  = hspMensal.indexOf(hspCritico);
             const diasCritico    = DIAS_MES[mesIdxCritico];
@@ -1007,7 +983,7 @@ document.addEventListener('DOMContentLoaded', () => {
             "IEC 61643-31          —  Proteção contra sobretensões CC (DPS, Uc ≥ 1,2 × Voc_frio)",
             "IEC 61643-11          —  Proteção contra sobretensões CA (DPS, Uc ≥ 1,1 × Vrede)",
             "IEC 60269-6           —  Fusíveis CC para sistemas FV (In ≥ 1,4 × Isc)",
-            "IEC 62109-2 §4.3.8   —  Verificação de tensão corrigida por temperatura (string design)",
+            "IEC 62109-2 §4.3.8    —  Verificação de tensão por temperatura (string design)",
             "IEC 61724-1           —  Performance ratio — decomposição de perdas por componente",
             "IEC 61215             —  Qualificação de projeto de módulos FV",
             "Atlas LABREN/INPE     —  Base de dados de irradiação solar (Brasil)",
