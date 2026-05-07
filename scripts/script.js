@@ -844,7 +844,7 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.setFont("courier", "normal");
         doc.setFontSize(7);
         doc.setTextColor(60, 70, 90);
-        doc.text("Elaborado por: Kessia Carvalho  ·  Dimensionamento Fotovoltaico v3.1", 105, 275, { align: 'center' });
+        doc.text("Elaborado por: Kessia Carvalho  ·  Dimensionamento Fotovoltaico", 105, 275, { align: 'center' });
         doc.text(`Emitido em: ${new Date().toLocaleDateString('pt-BR')}  ·  Estimativa técnica. Projeto definitivo requer ART de engenheiro credenciado no CREA.`, 105, 281, { align: 'center' });
 
         // ── PÁG 2 — Dados e Parâmetros ─────────────────────
