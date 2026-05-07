@@ -1,105 +1,153 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dimensionamento Solar - Portfólio</title>
-    <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
-    <link rel="stylesheet" href="styles/style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script defer src="scripts/script.js"></script>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dimensionamento Fotovoltaico | Kessia Carvalho</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="./styles/style.css">
 </head>
 <body>
-    <div class="menuOpen hidden" id="menuOverlay">
-        <div class="menu-content">
-            <h2>MENU</h2>
-            <nav>
-                <a href="https://kessiacz.github.io/">Página Inicial</a>
-                <a href="https://kessiacz.github.io/#sobre">Apresentação</a>
-                <a href="https://kessiacz.github.io/#exercicios">Exercícios</a>
-                <a href="https://kessiacz.github.io/#contacts">Contatos</a>
-            </nav>
+<div class="glow g1"></div>
+<div class="glow g2"></div>
+
+<nav>
+  <a href="https://kessiacz.github.io/" class="nav-logo">KC.</a>
+  <a href="https://kessiacz.github.io/" class="nav-back">Voltar ao portfólio</a>
+</nav>
+
+<div class="page">
+  <div class="page-tag">projeto</div>
+  <h1 class="page-title">Dimensionamento<br>Fotovoltaico</h1>
+  <p class="page-sub">Calcule a quantidade de painéis solares e a potência do sistema para a sua instalação On-Grid, Off-Grid ou Híbrida.</p>
+
+  <div class="main-grid">
+    <!-- FORM -->
+    <div class="form-card">
+      <div class="form-section">
+        <div class="form-section-title">instalação</div>
+        <div class="field">
+          <label>CEP da instalação</label>
+          <input type="text" id="cep" placeholder="00000-000" maxlength="9"/>
         </div>
+        <div class="field">
+          <label>Tipo de sistema</label>
+          <select id="sistema" onchange="toggleFields()">
+            <option value="ongrid">Sistema On-Grid (conectado à rede)</option>
+            <option value="offgrid">Sistema Off-Grid (autônomo)</option>
+            <option value="hibrido">Sistema Híbrido</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">consumo</div>
+        <div class="field">
+          <label>Grupo tarifário</label>
+          <select id="grupo">
+            <option value="B">Grupo B — Residencial / Rural</option>
+            <option value="A">Grupo A — Industrial / Comercial</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Tipo de conexão</label>
+          <select id="conexao">
+            <option value="30">Monofásico (ref. 30 kWh/mês mín.)</option>
+            <option value="50">Bifásico (ref. 50 kWh/mês mín.)</option>
+            <option value="100">Trifásico (ref. 100 kWh/mês mín.)</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Consumo médio (kWh/mês)</label>
+            <input type="number" id="consumo" placeholder="Ex: 350" min="0"/>
+          </div>
+          <div class="field" id="demanda-field">
+            <label>Demanda contratada (kW)</label>
+            <input type="number" id="demanda" placeholder="Ex: 10" min="0"/>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-section" id="autonomia-section" style="display:none;">
+        <div class="form-section-title">armazenamento</div>
+        <div class="field">
+          <label>Dias de autonomia (Off-Grid / Híbrido)</label>
+          <input type="number" id="autonomia" placeholder="Ex: 2" min="1" max="30"/>
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-section-title">painel solar</div>
+        <div class="field-row">
+          <div class="field">
+            <label>Potência do painel (Wp)</label>
+            <input type="number" id="painel-wp" value="550" min="50" max="700"/>
+          </div>
+          <div class="field">
+            <label>HSP estimado (h/dia)</label>
+            <input type="number" id="hsp" value="5.0" step="0.1" min="2" max="8"/>
+          </div>
+        </div>
+      </div>
+
+      <button class="calc-btn" onclick="calcular()">Calcular Sistema</button>
     </div>
 
-    <header>
-        <div class="container">
-            <div class="header-left">
-                <div class="menu">
-                    <i class="ri-menu-line" id="openIcon"></i>
-                    <i class="ri-close-line hidden" id="closeIcon"></i>
-                </div>
-                <a href="https://kessiacz.github.io/" class="back-button">
-                    <i class="ri-arrow-left-line"></i>
-                </a>
-            </div>
-            <nav class="nav-desktop">
-               <a href="https://kessiacz.github.io/"><h2>PORTFÓLIO</h2></a>
-            </nav>
-            <div class="toggle">
-                <input type="checkbox" id="checkbox">
-                <label for="checkbox" class="label"><div class="box"></div></label>
-            </div>
-        </div>
-    </header>
+    <!-- RESULTS -->
+    <div class="result-panel">
+      <div class="error-msg" id="error-msg"></div>
+      <div class="result-card" id="result-card">
+        <div class="result-title">Resultado do dimensionamento</div>
 
-    <main>
-        <div class="page-title">
-            <h2>DIMENSIONAMENTO<br>ENERGIA SOLAR</h2>
+        <div class="metric metric-amber">
+          <div class="metric-label">Painéis necessários</div>
+          <div class="metric-value" id="r-paineis">— <span>painéis</span></div>
+          <div class="metric-sub" id="r-painel-info"></div>
         </div>
 
-        <section class="container-exercicios">
-            <details open>
-                <summary>SISTEMA DE DIMENSIONAMENTO PARA INSTALAÇÃO DE ENERGIA SOLAR</summary>
-                <div class="content">
-                    <form id="solarForm">
-                        <label>CEP DA INSTALAÇÃO:</label>
-                        <input type="text" name="cep" id="cep" placeholder="00000-000" required>
-                        
-                        <label>TIPO DE SISTEMA:</label>
-                        <select name="tipo_sys" id="tipo_sys">
-                            <option value="ongrid">SISTEMA ON-GRID</option>
-                            <option value="offgrid">SISTEMA OFF-GRID</option>
-                            <option value="hibrido">SISTEMA HÍBRIDO</option>
-                        </select>
+        <div class="metric metric-teal">
+          <div class="metric-label">Potência total do sistema</div>
+          <div class="metric-value" id="r-potencia">— <span>kWp</span></div>
+        </div>
 
-                        <div id="container_grupo" style="width: 100%;">
-                            <label>GRUPO TARIFÁRIO:</label>
-                            <select name="grupo" id="grupo">
-                                <option value="B">GRUPO B (RESIDENCIAL/RURAL)</option>
-                                <option value="A">GRUPO A (INDUSTRIAL)</option>
-                            </select>
-                        </div>
+        <div class="metric">
+          <div class="metric-label">Geração estimada</div>
+          <div class="metric-value" id="r-geracao">— <span>kWh/mês</span></div>
+          <div class="metric-sub" id="r-cobertura"></div>
+        </div>
 
-                        <div id="campo_padrao" style="width: 100%;">
-                            <label>TIPO DE CONEXÃO:</label>
-                            <select name="padrao" id="padrao">
-                                <option value="mono">MONOFÁSICO (30 kWh)</option>
-                                <option value="bi">BIFÁSICO (50 kWh)</option>
-                                <option value="tri">TRIFÁSICO (100 kWh)</option>
-                            </select>
-                        </div>
+        <div class="metric" id="bateria-block" style="display:none;">
+          <div class="metric-label">Banco de baterias (100Ah 12V)</div>
+          <div class="metric-value" id="r-baterias">— <span>baterias</span></div>
+          <div class="metric-sub" id="r-bat-info"></div>
+        </div>
 
-                        <label>CONSUMO MÉDIO (kWh):</label>
-                        <input type="number" name="media_kwh" id="media_kwh" placeholder="0,00" required step="0.01">
+        <div class="metric" style="display:none;" id="demanda-block">
+          <div class="metric-label">Demanda atendida</div>
+          <div class="metric-value" id="r-demanda">—</div>
+        </div>
+      </div>
 
-                        <div id="campo_demanda" style="display:none; width: 100%;">
-                            <label>DEMANDA CONTRATADA (kW):</label>
-                            <input type="number" name="demanda" id="demanda" placeholder="0,00" step="0.01">
-                        </div>
+      <div class="note-card">
+        <div class="note-title">Observações técnicas</div>
+        <div class="note-item">HSP (Horas de Sol Pleno) varia por região. Nordeste ≈ 5.5 h/dia, Sul ≈ 4.2 h/dia.</div>
+        <div class="note-item">Eficiência do sistema considerada em 75% (perdas por inversor, cabeamento e temperatura).</div>
+        <div class="note-item">Valores são estimativas. Consulte um engenheiro credenciado para projeto definitivo.</div>
+        <div class="note-item">Baterias calculadas com DoD de 50% e tensão de 12V / 100Ah.</div>
+      </div>
+    </div>
+  </div>
+</div>
 
-                        <div id="campo_autonomia" style="display:none; width: 100%;">
-                            <label>DIAS DE AUTONOMIA:</label>
-                            <input type="number" name="autonomia" id="autonomia" placeholder="EX: 1">
-                        </div>
+<footer>
+  <span class="footer-copy">© 2025 Kessia Carvalho</span>
+  <span class="footer-copy" style="color:rgba(122,130,152,0.35)">Dimensionamento Solar</span>
+</footer>
 
-                        <button type="submit" id="btnCalcular">CALCULAR</button>
-                    </form>
-
-                    <div id="resultado-container"></div>
-                </div>
-            </details>
-        </section>
-    </main>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script defer src="./scripts/script.js"></script>
 </body>
 </html>
