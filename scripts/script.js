@@ -1,5 +1,5 @@
 // ════════════════════════════════════════════════════════
-//  TEMA + CURSOR + PROGRESSO — padrão ifpb-editais
+//  TEMA + CURSOR + PROGRESSO
 // ════════════════════════════════════════════════════════
 (function initUI() {
     // ── Toggle de tema ──

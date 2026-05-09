@@ -22,7 +22,7 @@
     --radius-sm:  8px;
 }
 
-/* ── Modo claro — mesma classe do ifpb-editais ── */
+/* ── Modo claro ── */
 .light-mode {
     --bg:         #f0f2f5;
     --bg2:        #e4e8ee;
@@ -403,7 +403,7 @@ select option { background: var(--bg3); }
 * { scrollbar-width: thin; scrollbar-color: #0a241b var(--bg); }
 
 /* ════════════════════════════════════════════════════════
-   CURSOR — igual ao ifpb-editais
+   CURSOR
    ════════════════════════════════════════════════════════ */
 @media(min-width:1024px) {
     body { cursor: none; }
@@ -420,7 +420,7 @@ select option { background: var(--bg3); }
 .cursor-outline { width: 40px; height: 40px; border: 2px solid var(--accent); opacity: .5; }
 
 /* ════════════════════════════════════════════════════════
-   FOOTER — igual ao ifpb-editais
+   FOOTER
    ════════════════════════════════════════════════════════ */
 footer {
     position: relative; z-index: 1;
