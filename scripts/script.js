@@ -1,26 +1,60 @@
 // ════════════════════════════════════════════════════════
-//  MENU OVERLAY + TOGGLE DE TEMA — igual ao ifpb-editais
+//  TEMA + CURSOR + PROGRESSO — padrão ifpb-editais
 // ════════════════════════════════════════════════════════
 (function initUI() {
-    const overlay  = document.getElementById('menuOverlay');
-    const btnOpen  = document.getElementById('menuOpen');
-    const btnClose = document.getElementById('menuClose');
-
-    if (btnOpen)  btnOpen .addEventListener('click', () => overlay.classList.add('open'));
-    if (btnClose) btnClose.addEventListener('click', () => overlay.classList.remove('open'));
-    if (overlay)  overlay .addEventListener('click', e => {
-        if (e.target === overlay) overlay.classList.remove('open');
-    });
-
+    // ── Toggle de tema ──
     const toggle = document.getElementById('themeToggle');
     if (toggle) {
         const saved = localStorage.getItem('kc-theme');
-        if (saved === 'light') { document.body.classList.add('light'); toggle.checked = true; }
+        if (saved === 'light-mode') {
+            document.documentElement.classList.add('light-mode');
+            document.body.classList.add('light-mode');
+            toggle.checked = true;
+        }
         toggle.addEventListener('change', () => {
-            document.body.classList.toggle('light', toggle.checked);
-            localStorage.setItem('kc-theme', toggle.checked ? 'light' : 'dark');
+            const on = toggle.checked;
+            document.documentElement.classList.toggle('light-mode', on);
+            document.body.classList.toggle('light-mode', on);
+            localStorage.setItem('kc-theme', on ? 'light-mode' : 'dark');
         });
     }
+
+    // ── Cursor personalizado (só desktop) ──
+    const cursorDot     = document.querySelector('.cursor-dot');
+    const cursorOutline = document.querySelector('.cursor-outline');
+
+    if (cursorDot && cursorOutline) {
+        window.addEventListener('mousemove', (e) => {
+            const posX = e.clientX;
+            const posY = e.clientY;
+
+            cursorDot.style.left = `${posX}px`;
+            cursorDot.style.top  = `${posY}px`;
+
+            cursorOutline.animate(
+                { left: `${posX}px`, top: `${posY}px` },
+                { duration: 500, fill: 'forwards' }
+            );
+        });
+
+        window.addEventListener('mousedown', () => {
+            cursorOutline.style.transform = 'translate(-50%, -50%) scale(0.7)';
+        });
+        window.addEventListener('mouseup', () => {
+            cursorOutline.style.transform = 'translate(-50%, -50%) scale(1)';
+        });
+    }
+
+    // ── Barra de progresso ──
+    const progressBar = document.getElementById('progress-bar');
+    const updateProgress = () => {
+        const scrollTop  = window.scrollY || document.documentElement.scrollTop;
+        const docHeight  = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const pct        = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0;
+        if (progressBar) progressBar.style.width = pct + '%';
+    };
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    updateProgress();
 })();
 
 // ════════════════════════════════════════════════════════
@@ -46,7 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const TARIFA_KWH            = 0.85;    // R$/kWh — média nacional ANEEL 2024
     const REAJUSTE_TARIFA_ANUAL = 0.06;    // 6 %/ano
     const TMA                   = 0.08;    // 8 % a.a. — Taxa Mínima de Atratividade
-    const MESES   = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+    const MESES    = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
     const DIAS_MES = [31,28,31,30,31,30,31,31,30,31,30,31];
 
     // ════════════════════════════════════════════════════════
@@ -94,14 +128,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (valorBruto > 100)   return 1000;
         return 1;
     }
-
     async function buscarNoAtlasPorCoordenadas(latBusca, lonBusca) {
         try {
             const res = await fetch('./atlas_labren.csv');
             if (!res.ok) { console.warn("atlas_labren.csv não encontrado — usando HSP manual."); return null; }
             const texto  = await res.text();
             const linhas = texto.split(/\r?\n/);
-
             let divisorGlobal = null;
             for (let i = 1; i < linhas.length; i++) {
                 if (!linhas[i].trim()) continue;
@@ -112,7 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             if (divisorGlobal === null) { console.warn("Não foi possível detectar unidade do CSV."); return null; }
-
             let melhor = null, menorDist = Infinity;
             for (let i = 1; i < linhas.length; i++) {
                 if (!linhas[i].trim()) continue;
@@ -184,30 +215,24 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (painelWp <= 450) { voc = 49.5; vmp = 41.0; isc = 11.0; imp = 10.5; }
         else if (painelWp <= 550) { voc = 50.0; vmp = 42.0; isc = 13.8; imp = 13.1; }
         else                      { voc = 53.0; vmp = 44.5; isc = 14.5; imp = 13.8; }
-
         const V_MPPT_MIN = 200;
         const V_MPPT_MAX = 600;
         const V_MAX_INV  = 1000;
-
         const voc_frio = +(voc * (1 + COEF_TEMP_V * (T_MIN_CELULA - T_STC))).toFixed(2);
         const vmp_qte  = +(vmp * (1 + COEF_TEMP_V * (T_MAX_CELULA - T_STC))).toFixed(2);
-
         const ps_min      = Math.ceil(V_MPPT_MIN  / vmp_qte);
         const ps_max_mppt = Math.floor(V_MPPT_MAX  / vmp);
         const ps_max_inv  = Math.floor(V_MAX_INV   / voc_frio);
         const ps_max      = Math.min(ps_max_mppt, ps_max_inv);
-
         const numStrings = Math.ceil(numPaineis / ps_max);
         let paineisPorString = Math.ceil(numPaineis / numStrings);
         paineisPorString = Math.max(ps_min, paineisPorString);
-
         const voc_total      = +(paineisPorString * voc).toFixed(1);
         const vmp_total      = +(paineisPorString * vmp).toFixed(1);
         const isc_total      = +(numStrings       * isc).toFixed(1);
         const imp_total      = +(numStrings       * imp).toFixed(1);
         const voc_total_frio = +(paineisPorString * voc_frio).toFixed(1);
         const vmp_total_qte  = +(paineisPorString * vmp_qte).toFixed(1);
-
         const alertas = [];
         if (voc_total_frio > V_MAX_INV)
             alertas.push(`Voc corrigido (frio, ${T_MIN_CELULA} °C) = ${voc_total_frio} V excede V_máx do inversor (${V_MAX_INV} V). Reduza a string.`);
@@ -215,7 +240,6 @@ document.addEventListener('DOMContentLoaded', () => {
             alertas.push(`Vmp corrigido (calor, ${T_MAX_CELULA} °C) = ${vmp_total_qte} V está abaixo do MPPT mínimo (${V_MPPT_MIN} V). Aumente a string.`);
         if (vmp_total > V_MPPT_MAX)
             alertas.push(`Vmp nominal (${vmp_total} V) excede o limite MPPT máximo (${V_MPPT_MAX} V). Reduza a string.`);
-
         return {
             numStrings, paineisPorString,
             voc_total, vmp_total, isc_total, imp_total,
@@ -240,7 +264,6 @@ document.addEventListener('DOMContentLoaded', () => {
         {s:50,  i:112 },{s:70,  i:138 },{s:95,  i:168 },{s:120, i:194 },{s:150,i:223}
     ];
     const SECAO_MIN_DC_ENERGISA = 4;
-
     function normalizarSecao(secao_calc) {
         const encontrada = SECOES_COMERCIAIS.find(s => s >= secao_calc);
         if (!encontrada) { console.warn(`Seção calculada (${secao_calc.toFixed(2)} mm²) excede 150 mm².`); return 150; }
@@ -348,16 +371,16 @@ document.addEventListener('DOMContentLoaded', () => {
     //  CÁLCULO PRINCIPAL
     // ════════════════════════════════════════════════════════
     window.calcular = async () => {
-        const btn       = document.querySelector('.calc-btn');
-        const cepVal    = document.getElementById('cep').value.replace(/\D/g, '');
-        const consumo   = parseFloat(document.getElementById('consumo').value);
-        const painelWp  = parseFloat(document.getElementById('painel-wp').value);
-        const sistema   = document.getElementById('sistema').value;
-        const grupo     = document.getElementById('grupo').value;
+        const btn        = document.querySelector('.calc-btn');
+        const cepVal     = document.getElementById('cep').value.replace(/\D/g, '');
+        const consumo    = parseFloat(document.getElementById('consumo').value);
+        const painelWp   = parseFloat(document.getElementById('painel-wp').value);
+        const sistema    = document.getElementById('sistema').value;
+        const grupo      = document.getElementById('grupo').value;
         const conexaoVal = document.getElementById('conexao').value;
-        const demanda   = parseFloat(document.getElementById('demanda').value) || 0;
-        const autonomia = parseInt(document.getElementById('autonomia').value)  || 1;
-        const hspManual = parseFloat(document.getElementById('hsp').value)      || 5.0;
+        const demanda    = parseFloat(document.getElementById('demanda').value) || 0;
+        const autonomia  = parseInt(document.getElementById('autonomia').value)  || 1;
+        const hspManual  = parseFloat(document.getElementById('hsp').value)      || 5.0;
 
         if (!cepVal || cepVal.length < 8)     return showError("Informe um CEP válido (8 dígitos).");
         if (isNaN(consumo) || consumo <= 0)   return showError("Informe o consumo médio mensal em kWh.");
@@ -446,7 +469,6 @@ document.addEventListener('DOMContentLoaded', () => {
             };
 
             exibirResultadosCard(ultimoResultado, painelWp);
-
         } catch (err) {
             showError(err.message || "Erro inesperado. Verifique os dados.");
         } finally {
@@ -660,7 +682,6 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.setFont("helvetica","normal"); doc.setFontSize(10); doc.setTextColor(160,170,190);
         doc.text(`Sistema ${res.tipo}  ·  ${res.cidade}`,105,112,{align:'center'});
         doc.text(`CEP ${res.cep}  ·  ${parseFloat(res.lat).toFixed(4)}°, ${parseFloat(res.lon).toFixed(4)}°`,105,120,{align:'center'});
-
         const badges = [`${res.pot_final.toFixed(2)} kWp`,`${res.numPaineis} painéis`,`${res.geracaoAnual.toFixed(0)} kWh/ano`,`TIR ${f.tir !== null ? f.tir+'%' : '>8%'}`];
         badges.forEach((b,i)=>{
             const bx=20+i*44;
@@ -671,8 +692,8 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.setFont("courier","normal"); doc.setFontSize(7); doc.setTextColor(60,70,90);
         doc.text("Elaborado por: Kessia Carvalho  ·  Dimensionamento Fotovoltaico",105,275,{align:'center'});
         doc.text(`Emitido em: ${new Date().toLocaleDateString('pt-BR')}  ·  Estimativa técnica.`,105,281,{align:'center'});
-
         addPage();
+
         titulo("Dados do Projeto","1");
         linha("Localização (CEP)",res.cep); linha("Cidade / UF",res.cidade);
         linha("Latitude / Longitude",`${parseFloat(res.lat).toFixed(4)}° / ${parseFloat(res.lon).toFixed(4)}°`);
@@ -692,8 +713,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const nomePerdas={inversor:'Inversor',cabeamento_dc:'Cabeamento CC',temperatura:'Temperatura (NOCT)',sombreamento:'Sombreamento',sujidade:'Sujidade',mismatch:'Mismatch',disponibilidade:'Disponibilidade',controlador:'Controlador CC',baterias:'Banco de Baterias'};
         Object.entries(res.perdas).forEach(([k,v])=>linha(`  Perda — ${nomePerdas[k]||k}`,`-${(v*100).toFixed(1)}%`));
         linha("Performance Ratio (PR)",`${(res.pr*100).toFixed(1)}%`,true); sep();
-
         addPage();
+
         titulo("Dimensionamento dos Equipamentos","4");
         linha("Painel fotovoltaico",`${painelWp} Wp`); linha("Quantidade de painéis",`${res.numPaineis} unidades`);
         linha("Potência total instalada",`${res.pot_final.toFixed(3)} kWp`,true);
@@ -726,8 +747,8 @@ document.addEventListener('DOMContentLoaded', () => {
             linha("Capacidade",`${b.ah} Ah`); linha("Controlador de carga",`${b.controlador} A`);
             linha("Autonomia",`${b.autonomia} dia(s)`); sep();
         }
-
         addPage();
+
         titulo("Geração Estimada Mês a Mês","9");
         res.geracaoMensal.forEach((m,i)=>{
             const flag=m.geracao<res.meta_geracao*0.9;
@@ -766,36 +787,3 @@ document.addEventListener('DOMContentLoaded', () => {
         doc.text(`Gerado em ${new Date().toLocaleString('pt-BR')}`,196,291,{align:'right'});
     }
 });
-
-// ── Detecção touch ──
-const isTouch = () => window.matchMedia('(hover:none) and (pointer:coarse)').matches;
-
-// ── Cursor (só desktop) ──
-if (!isTouch()) {
-  const dot = document.querySelector('.cursor-dot');
-  const out = document.querySelector('.cursor-outline');
-  if (dot && out) {
-    let mx=0,my=0,ox=0,oy=0;
-    window.addEventListener('mousemove', e => {
-      mx=e.clientX; my=e.clientY;
-      dot.style.transform=`translate(${mx}px,${my}px) translate(-50%,-50%)`;
-    });
-    (function loop(){
-      ox+=(mx-ox)*.15; oy+=(my-oy)*.15;
-      out.style.transform=`translate(${ox}px,${oy}px) translate(-50%,-50%)`;
-      requestAnimationFrame(loop);
-    })();
-    document.querySelectorAll('a,button,.form-card,.note-card').forEach(el=>{
-      el.addEventListener('mouseenter',()=>{out.style.width='55px';out.style.height='55px';out.style.backgroundColor='var(--teal-dim)';out.style.opacity='.2'});
-      el.addEventListener('mouseleave',()=>{out.style.width='34px';out.style.height='34px';out.style.backgroundColor='transparent';out.style.opacity='.4'});
-    });
-  }
-}
-
-// ── Barra de progresso ──
-window.addEventListener('scroll', () => {
-  const pct = document.documentElement.scrollTop /
-    (document.documentElement.scrollHeight - window.innerHeight) * 100;
-  const bar = document.getElementById('progress-bar');
-  if (bar) bar.style.width = pct + '%';
-}, {passive:true});

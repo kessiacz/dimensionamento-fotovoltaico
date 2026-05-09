@@ -4,23 +4,18 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dimensionamento Fotovoltaico | Kessia Carvalho</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="./styles/style.css">
 </head>
 <body>
   <div class="cursor-dot"></div>
   <div class="cursor-outline"></div>
-
-  <!-- Glow blobs — igual ao ifpb-editais -->
   <div class="glow-blob glow-blob-1"></div>
   <div class="glow-blob glow-blob-2"></div>
-
   <div id="progress-bar"></div>
 
+  <!-- ── HEADER ── -->
   <header>
     <div class="header-inner">
       <div class="header-left">
@@ -41,19 +36,56 @@
   </header>
 
   <!-- ── MAIN ── -->
+  <main>
 
-  <div class="page">
+    <!-- breadcrumb -->
     <div class="breadcrumb">
-        <a href="https://kessiacz.github.io/">kessiacz</a>
-        <span>/</span>
-        <a href="#">dimensionamento-fotovoltaico</a>
+      <a href="https://kessiacz.github.io/">kessiacz</a>
+      <span>/</span>
+      <span>dimensionamento-fotovoltaico</span>
     </div>
 
-    <div class="page-head-label">03 — projeto</div>
-    <h1 class="page-title">Dimensionamento<br>Fotovoltaico</h1>
-    <p class="page-sub">Calcule a quantidade de painéis solares e a potência do sistema para a sua instalação On-Grid, Off-Grid ou Híbrida.</p>
+    <!-- page head -->
+    <div class="page-head">
+      <div>
+        <div class="page-head-label">03 — projeto</div>
+        <h1>Dimensionamento<br>Fotovoltaico</h1>
+      </div>
+      <div class="page-head-meta">
+        <span class="tag green">● online</span>
+        <span class="tag">JavaScript</span>
+        <span class="tag">Engenharia Solar</span>
+        <span class="tag">NBR 16690</span>
+      </div>
+    </div>
 
+    <!-- desc -->
+    <div class="desc-block">
+      <p class="desc-text">
+        Calcule a quantidade de <strong>painéis solares</strong> e a potência do sistema para sua instalação
+        <strong>On-Grid</strong>, <strong>Off-Grid</strong> ou <strong>Híbrida</strong>. Informe o CEP,
+        consumo e tipo de sistema para obter dimensionamento completo com análise financeira e memorial
+        de cálculo em PDF.
+      </p>
+      <div class="desc-aside">
+        <div class="aside-item">
+          <div class="aside-label">Normas</div>
+          <div class="aside-value">NBR 16690 · NBR 5410</div>
+        </div>
+        <div class="aside-item">
+          <div class="aside-label">Stack</div>
+          <div class="aside-value">JS · ViaCEP · Nominatim</div>
+        </div>
+        <div class="aside-item">
+          <div class="aside-label">Dados</div>
+          <div class="aside-value">Atlas LABREN / INPE</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- main grid: form + results -->
     <div class="main-grid">
+
       <!-- FORM -->
       <div class="form-card">
         <div class="form-section">
@@ -71,7 +103,6 @@
             </select>
           </div>
         </div>
-
         <div class="form-section">
           <div class="form-section-title">consumo</div>
           <div class="field">
@@ -100,7 +131,6 @@
             </div>
           </div>
         </div>
-
         <div class="form-section" id="autonomia-section" style="display:none;">
           <div class="form-section-title">armazenamento</div>
           <div class="field">
@@ -108,7 +138,6 @@
             <input type="number" id="autonomia" placeholder="Ex: 2" min="1" max="30"/>
           </div>
         </div>
-
         <div class="form-section">
           <div class="form-section-title">painel solar</div>
           <div class="field-row">
@@ -122,7 +151,6 @@
             </div>
           </div>
         </div>
-
         <button class="calc-btn" onclick="calcular()">Calcular Sistema</button>
       </div>
 
@@ -131,36 +159,30 @@
         <div class="error-msg" id="error-msg"></div>
         <div class="result-card" id="result-card">
           <div class="result-title">Resultado do dimensionamento</div>
-
           <div class="metric metric-amber">
             <div class="metric-label">Painéis necessários</div>
             <div class="metric-value" id="r-paineis">— <span>painéis</span></div>
             <div class="metric-sub" id="r-painel-info"></div>
           </div>
-
           <div class="metric metric-teal">
             <div class="metric-label">Potência total do sistema</div>
             <div class="metric-value" id="r-potencia">— <span>kWp</span></div>
           </div>
-
           <div class="metric">
             <div class="metric-label">Geração estimada</div>
             <div class="metric-value" id="r-geracao">— <span>kWh/mês</span></div>
             <div class="metric-sub" id="r-cobertura"></div>
           </div>
-
           <div class="metric" id="bateria-block" style="display:none;">
             <div class="metric-label">Banco de baterias (100Ah 12V)</div>
             <div class="metric-value" id="r-baterias">— <span>baterias</span></div>
             <div class="metric-sub" id="r-bat-info"></div>
           </div>
-
           <div class="metric" style="display:none;" id="demanda-block">
             <div class="metric-label">Demanda atendida</div>
             <div class="metric-value" id="r-demanda">—</div>
           </div>
         </div>
-
         <div class="note-card">
           <div class="note-title">Observações técnicas</div>
           <div class="note-item">HSP (Horas de Sol Pleno) varia por região. Nordeste ≈ 5.5 h/dia, Sul ≈ 4.2 h/dia.</div>
@@ -169,35 +191,16 @@
           <div class="note-item">Baterias calculadas com base na tensão ideal para a potência do sistema (DoD 50%).</div>
         </div>
       </div>
+
     </div>
-  </div>
+  </main>
 
   <footer>
-    <span class="footer-copy">© 2026 Kessia Carvalho</span>
-    <span class="footer-copy" style="color:rgba(122,130,152,0.35)">Dimensionamento Solar</span>
+    <span>© 2026 Kessia Carvalho</span>
+    <a href="https://kessiacz.github.io/">← voltar ao portfólio</a>
   </footer>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script defer src="./scripts/script.js"></script>
-
-  <!-- ── Header / Menu / Tema — igual ao ifpb-editais ── -->
-  <script>
-    // Menu overlay
-    const overlay   = document.getElementById('menuOverlay');
-    const btnOpen   = document.getElementById('menuOpen');
-    const btnClose  = document.getElementById('menuClose');
-    btnOpen .addEventListener('click', () => overlay.classList.add('open'));
-    btnClose.addEventListener('click', () => overlay.classList.remove('open'));
-    overlay .addEventListener('click', e => { if(e.target === overlay) overlay.classList.remove('open'); });
-
-    // Toggle tema claro/escuro
-    const toggle = document.getElementById('themeToggle');
-    const saved  = localStorage.getItem('kc-theme');
-    if(saved === 'light'){ document.body.classList.add('light'); toggle.checked = true; }
-    toggle.addEventListener('change', () => {
-      document.body.classList.toggle('light', toggle.checked);
-      localStorage.setItem('kc-theme', toggle.checked ? 'light' : 'dark');
-    });
-  </script>
 </body>
 </html>
