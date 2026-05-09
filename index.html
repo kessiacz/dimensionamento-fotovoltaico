@@ -6,23 +6,42 @@
   <title>Dimensionamento Fotovoltaico | Kessia Carvalho</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=JetBrains+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@300;400;500;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css" rel="stylesheet">
   <link rel="stylesheet" href="./styles/style.css">
 </head>
 <body>
   <div class="cursor-dot"></div>
   <div class="cursor-outline"></div>
-  <div class="glow g1"></div>
-  <div class="glow g2"></div>
+
+  <!-- Glow blobs — igual ao ifpb-editais -->
+  <div class="glow-blob glow-blob-1"></div>
+  <div class="glow-blob glow-blob-2"></div>
+
   <div id="progress-bar"></div>
 
-  <nav>
-    <a href="https://kessiacz.github.io/" class="nav-logo">KC.</a>
-    <a href="https://kessiacz.github.io/" class="nav-back">
-      <span>Voltar</span> <span class="hide-mobile">ao portfólio</span>
-    </a>
-  </nav>
+  <!-- ── HEADER — idêntico ao ifpb-editais ── -->
+  <header>
+    <div class="header-inner">
+      <div class="header-left">
+        <a class="back-btn" href="https://kessiacz.github.io/">
+          <i class="ri-arrow-left-line"></i>
+          <span>Portfólio</span>
+        </a>
+      </div>
+      <a class="header-logo" href="https://kessiacz.github.io/">KC.</a>
+      <div class="header-right">
+        <div class="toggle-wrap">
+          <span>☾</span>
+          <input type="checkbox" id="themeToggle" class="toggle-input">
+          <label for="themeToggle" class="toggle-label"></label>
+          <span>☀</span>
+        </div>
+      </div>
+    </div>
+  </header>
 
+  <!-- ── MAIN ── -->
   <div class="page">
     <div class="page-tag">projeto</div>
     <h1 class="page-title">Dimensionamento<br>Fotovoltaico</h1>
@@ -154,5 +173,25 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script defer src="./scripts/script.js"></script>
+
+  <!-- ── Header / Menu / Tema — igual ao ifpb-editais ── -->
+  <script>
+    // Menu overlay
+    const overlay   = document.getElementById('menuOverlay');
+    const btnOpen   = document.getElementById('menuOpen');
+    const btnClose  = document.getElementById('menuClose');
+    btnOpen .addEventListener('click', () => overlay.classList.add('open'));
+    btnClose.addEventListener('click', () => overlay.classList.remove('open'));
+    overlay .addEventListener('click', e => { if(e.target === overlay) overlay.classList.remove('open'); });
+
+    // Toggle tema claro/escuro
+    const toggle = document.getElementById('themeToggle');
+    const saved  = localStorage.getItem('kc-theme');
+    if(saved === 'light'){ document.body.classList.add('light'); toggle.checked = true; }
+    toggle.addEventListener('change', () => {
+      document.body.classList.toggle('light', toggle.checked);
+      localStorage.setItem('kc-theme', toggle.checked ? 'light' : 'dark');
+    });
+  </script>
 </body>
 </html>
